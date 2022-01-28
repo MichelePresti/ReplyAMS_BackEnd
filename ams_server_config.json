@@ -1,0 +1,10 @@
+{
+  "email": {
+    "user": "replyams.dev@gmail.com",
+    "password": "Gennaio2021!",
+    "imap": "imap.gmail.com"
+  },
+  "fcm": {
+    "serverkey": "AAAAHeELsu0:APA91bHScmxbmvSuVYswsd5Y2hIUZnwW2yWzVsKILHrRScVvK6vyAjllNcpbWRe3l0aLKZjkK-d8c59iJCVZ3ZI67riMYDwxX5K9hJr3xBA_tjlwC23dHH5LdDEsvGQuNw2UrNUDfPTB"
+  }
+}
