@@ -8,15 +8,33 @@ import email
 from bs4 import BeautifulSoup
 import pandas as pd
 
+from storage_service import StorageService
+
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+
+
+class EmailManager:
+
+    def __init__(self):
+        self.newEmail = False
+        self.totalEmailNumber = 0
+
+    def get_unread_message(self):
+        return self.newEmail
+
+    def set_unread_message(self, message):
+        self.newEmail = message
+        if message is True:
+            self.totalEmailNumber += 1
 
 
 class EmailService:
 
-    def __init__(self, e_mail, password, imap):
+    def __init__(self, e_mail, password, imap, storage: StorageService):
         self.e_mail = e_mail
         self.password = password
-        self.imap = imap
+        self.imap = imap,
+        self.storage = storage
 
     def get_emails(self):
         creds = None
@@ -52,26 +70,31 @@ class EmailService:
         # iterate through all the messages
         if messages is not None:
             for msg in messages:
-                # Get the message from its id
-                txt = service.users().messages().get(userId='me', id=msg['id']).execute()
-                print(txt)
-                # Use try-except to avoid any Errors
-                try:
-                    # Get value of 'payload' from dictionary 'txt'
-                    payload = txt['payload']
-                    headers = payload['headers']
+                if self.storage.register_new_email(msg['id']) > 0:
+                    # Get the message from its id
+                    txt = service.users().messages().get(userId='me', id=msg['id']).execute()
+                    print(txt)
+                    # Use try-except to avoid any Errors
+                    try:
+                        # Get value of 'payload' from dictionary 'txt'
+                        payload = txt['payload']
+                        email_id = txt['id']
+                        headers = payload['headers']
 
-                    # The Body of the message is in Encrypted format. So, we have to decode it.
-                    # Get the data and decode it with base 64 decoder.
-                    parts = payload.get('parts')[0]
-                    data = parts['body']['data']
-                    data = data.replace("-", "+").replace("_", "/")
-                    decoded_data = base64.b64decode(data)
+                        # The Body of the message is in Encrypted format. So, we have to decode it.
+                        # Get the data and decode it with base 64 decoder.
+                        parts = payload.get('parts')[0]
+                        data = parts['body']['data']
+                        data = data.replace("-", "+").replace("_", "/")
+                        decoded_data = base64.b64decode(data)
+                        print(parts)
+                        print('############################')
+                        print(headers)
 
-                    if str(decoded_data).lower().find('very high'):
-                        return True
-                    else:
-                        return False
+                        if str(decoded_data).lower().find('very high') > 0:
+                            return True, data
+                        else:
+                            return False, ''
 
-                except:
-                    print('Error in SOUP')
+                    except:
+                        print('Error in SOUP')
